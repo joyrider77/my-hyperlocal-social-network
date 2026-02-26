@@ -1,0 +1,205 @@
+type UserRole = 
+ variant {
+   admin;
+   guest;
+   user;
+ };
+type UserProfile = 
+ record {
+   language: text;
+   name: text;
+   profilePhoto: opt text;
+   theme: text;
+ };
+type UserApprovalInfo = 
+ record {
+   "principal": principal;
+   status: ApprovalStatus;
+ };
+type Time = int;
+type Reminder = 
+ record {
+   createdBy: principal;
+   date: Time;
+   description: opt text;
+   id: text;
+   title: text;
+ };
+type RSVP = 
+ record {
+   attending: bool;
+   inviteCode: text;
+   name: text;
+   timestamp: Time;
+ };
+type Poll = 
+ record {
+   createdAt: Time;
+   createdBy: principal;
+   duration: nat;
+   id: text;
+   isClosed: bool;
+   options: vec text;
+   question: text;
+   voters: vec principal;
+   votes: vec nat;
+ };
+type Media = 
+ record {
+   description: opt text;
+   filePath: text;
+   id: text;
+   isVideo: bool;
+   title: text;
+   uploadedBy: principal;
+ };
+type Link = 
+ record {
+   addedBy: principal;
+   description: opt text;
+   id: text;
+   previewImage: opt text;
+   tags: vec text;
+   title: text;
+   url: text;
+ };
+type InviteLogEntry = 
+ record {
+   admin: principal;
+   id: text;
+   inviteCode: text;
+   timestamp: Time;
+ };
+type InviteCode = 
+ record {
+   code: text;
+   created: Time;
+   used: bool;
+ };
+type FileReference = 
+ record {
+   hash: text;
+   path: text;
+ };
+type ChatMessage = 
+ record {
+   id: text;
+   links: vec text;
+   mediaPath: opt text;
+   message: text;
+   readBy: vec principal;
+   sender: principal;
+   timestamp: Time;
+ };
+type CalendarEvent = 
+ record {
+   createdBy: principal;
+   date: Time;
+   description: opt text;
+   id: text;
+   title: text;
+ };
+type BadgeCriteria = 
+ record {
+   activityType: text;
+   description: text;
+   icon: text;
+   id: text;
+   name: text;
+   requiredCount: nat;
+ };
+type ApprovalStatus = 
+ variant {
+   approved;
+   pending;
+   rejected;
+ };
+type Album = 
+ record {
+   createdBy: principal;
+   id: text;
+   mediaIds: vec text;
+   title: text;
+ };
+service : {
+  addEmojiReaction: (mediaId: text, emoji: text) -> ();
+  addLink: (url: text, title: text, description: opt text, previewImage:
+   opt text, tags: vec text) -> (text);
+  addMedia: (title: text, description: opt text, filePath: text, isVideo:
+   bool) -> (text);
+  addMediaToAlbum: (albumId: text, mediaId: text) -> ();
+  assignCallerUserRole: (user: principal, role: UserRole) -> ();
+  closePoll: (pollId: text) -> ();
+  createAlbum: (title: text) -> (text);
+  createBadgeCriteria: (name: text, description: text, icon: text,
+   requiredCount: nat, activityType: text) -> (text);
+  createCalendarEvent: (title: text, date: Time, description: opt text) ->
+   (text);
+  createPoll: (question: text, options: vec text, duration: nat) -> (text);
+  createReminder: (title: text, date: Time, description: opt text) -> (text);
+  deleteBadgeCriteria: (badgeId: text) -> ();
+  deleteLink: (id: text) -> ();
+  deleteMedia: (mediaId: text) -> ();
+  deleteMessage: (messageId: text) -> ();
+  deleteReminder: (reminderId: text) -> ();
+  dropFileReference: (path: text) -> ();
+  editBadgeCriteria: (badgeId: text, name: text, description: text, icon:
+   text, requiredCount: nat, activityType: text) -> ();
+  editLink: (id: text, url: text, title: text, description: opt text,
+   previewImage: opt text, tags: vec text) -> ();
+  editMessage: (messageId: text, newMessage: text) -> ();
+  generateInviteCode: () -> (text);
+  getAlbumMedia: (albumId: text) -> (vec Media) query;
+  getAlbums: () -> (vec Album) query;
+  getAllRSVPs: () -> (vec RSVP) query;
+  getAllTags: () -> (vec text) query;
+  getAllUserProfiles: () -> (vec record {
+                                   principal;
+                                   UserProfile;
+                                 }) query;
+  getBadgeCriteria: () -> (vec BadgeCriteria) query;
+  getCalendarEvents: () -> (vec CalendarEvent) query;
+  getCallerUserProfile: () -> (opt UserProfile) query;
+  getCallerUserRole: () -> (UserRole) query;
+  getChatMessages: () -> (vec ChatMessage) query;
+  getDashboardName: () -> (text) query;
+  getDefaultPreviewImage: () -> (opt text) query;
+  getFileReference: (path: text) -> (FileReference) query;
+  getInviteCodes: () -> (vec InviteCode) query;
+  getInviteLog: () -> (vec InviteLogEntry) query;
+  getLinks: () -> (vec Link) query;
+  getLinksByTag: (tag: text) -> (vec Link) query;
+  getMedia: () -> (vec Media) query;
+  getMediaReactions: (mediaId: text) -> (vec record {
+                                               text;
+                                               nat;
+                                             }) query;
+  getNetworkLogo: () -> (opt text) query;
+  getPoll: (pollId: text) -> (opt Poll) query;
+  getPolls: () -> (vec Poll) query;
+  getReminders: () -> (vec Reminder) query;
+  getUnreadMessageCount: () -> (nat) query;
+  getUserProfile: (user: principal) -> (opt UserProfile) query;
+  initializeAccessControl: () -> ();
+  isCallerAdmin: () -> (bool) query;
+  isCallerApproved: () -> (bool) query;
+  listApprovals: () -> (vec UserApprovalInfo) query;
+  listFileReferences: () -> (vec FileReference) query;
+  markAllMessagesAsRead: () -> ();
+  markMessageAsRead: (messageId: text) -> ();
+  registerFileReference: (path: text, hash: text) -> ();
+  registerUser: () -> ();
+  removeEmojiReaction: (mediaId: text, emoji: text) -> ();
+  removeMediaFromAlbum: (albumId: text, mediaId: text) -> ();
+  removeUser: (user: principal) -> ();
+  requestApproval: () -> ();
+  saveCallerUserProfile: (profile: UserProfile) -> ();
+  sendMessage: (message: text, mediaPath: opt text) -> (text);
+  setApproval: (user: principal, status: ApprovalStatus) -> ();
+  setDashboardName: (newName: text) -> ();
+  setDefaultPreviewImage: (imagePath: text) -> ();
+  setNetworkLogo: (logoPath: text) -> ();
+  submitRSVP: (name: text, attending: bool, inviteCode: text) -> ();
+  updateMediaPath: (messageId: text, mediaPath: text) -> ();
+  votePoll: (pollId: text, optionIndex: nat) -> ();
+}
